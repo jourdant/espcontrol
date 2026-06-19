@@ -504,6 +504,66 @@ inline void handle_button_press(const std::string &cfg, int slot_num,
   send_media_playback_action(p.entity, mode);
 }
 
+inline bool button_long_press_indicator_supported(const ParsedCfg &p) {
+  return button_long_press_action(p) == "modal" &&
+    ((p.type == "cover" && cover_toggle_mode(p.sensor)) ||
+     p.type == "light_control" ||
+     p.type == "light_switch" ||
+     p.type == "light_brightness" ||
+     p.type == "light_temperature" ||
+     (p.type.empty() && is_light_entity(p.entity)));
+}
+
+inline void button_long_press_arc_set_value(void *obj, int32_t value) {
+  if (obj) lv_arc_set_value(static_cast<lv_obj_t *>(obj), value);
+}
+
+inline void button_long_press_indicator_hide_timer(lv_timer_t *timer) {
+  if (!timer) return;
+  lv_obj_t *arc = static_cast<lv_obj_t *>(timer->user_data);
+  if (arc) lv_obj_add_flag(arc, LV_OBJ_FLAG_HIDDEN);
+  lv_timer_del(timer);
+}
+
+inline void button_long_press_indicator_stop(lv_obj_t *arc) {
+  if (!arc) return;
+  lv_anim_del(arc, button_long_press_arc_set_value);
+  lv_arc_set_value(arc, 0);
+  lv_obj_add_flag(arc, LV_OBJ_FLAG_HIDDEN);
+}
+
+inline void button_long_press_indicator_start(const std::string &cfg, lv_obj_t *arc,
+                                              float seconds) {
+  if (!arc) return;
+  ParsedCfg p = parse_cfg(cfg);
+  if (!button_long_press_indicator_supported(p)) {
+    button_long_press_indicator_stop(arc);
+    return;
+  }
+  if (std::isnan(seconds) || seconds < 1.0f) seconds = 2.0f;
+  if (seconds > 5.0f) seconds = 5.0f;
+  lv_anim_del(arc, button_long_press_arc_set_value);
+  lv_arc_set_value(arc, 0);
+  lv_obj_clear_flag(arc, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_move_foreground(arc);
+  lv_anim_t anim;
+  lv_anim_init(&anim);
+  lv_anim_set_var(&anim, arc);
+  lv_anim_set_exec_cb(&anim, button_long_press_arc_set_value);
+  lv_anim_set_values(&anim, 0, 100);
+  lv_anim_set_time(&anim, static_cast<uint32_t>(seconds * 1000.0f));
+  lv_anim_start(&anim);
+}
+
+inline void button_long_press_indicator_complete(lv_obj_t *arc) {
+  if (!arc) return;
+  lv_anim_del(arc, button_long_press_arc_set_value);
+  lv_arc_set_value(arc, 100);
+  lv_obj_clear_flag(arc, LV_OBJ_FLAG_HIDDEN);
+  lv_obj_move_foreground(arc);
+  lv_timer_create(button_long_press_indicator_hide_timer, 250, arc);
+}
+
 // ── Button click dispatch ─────────────────────────────────────────────
 
 struct MediaVolumeCtx;
@@ -535,6 +595,8 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
                                 lv_obj_t *btn_obj);
 
 inline bool handle_button_secondary_action(const ParsedCfg &p, lv_obj_t *btn_obj) {
+  if (button_long_press_action(p) == "none") return true;
+  if (button_long_press_action(p) == "tap") return false;
   if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
     CoverControlCtx *ctx = (CoverControlCtx *)lv_obj_get_user_data(btn_obj);
     if (ctx) {
@@ -632,7 +694,7 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
     send_cover_command_action(p);
   } else if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
     if (!p.entity.empty()) {
-      if (btn_obj && lv_obj_has_state(btn_obj, LV_STATE_USER_1)) {
+      if (cover_stop_on_move_enabled(p) && btn_obj && lv_obj_has_state(btn_obj, LV_STATE_USER_1)) {
         send_cover_command_action(p.entity, "stop");
         return;
       }

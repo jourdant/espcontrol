@@ -226,6 +226,7 @@ function sliderTypeFactory(opts) {
             b.sensor = coverMode;
           }
           syncCoverUi();
+          renderButtonSettings();
         }
 
         interactionSelect.addEventListener("change", function () { setCoverMode(this.value, true); });
@@ -236,6 +237,9 @@ function sliderTypeFactory(opts) {
       if (opts.renderLabelInSettings && !opts.labelAfterEntity) labelField();
 
       helpers.renderCardEntityField(panel, b, helpers, metadata);
+
+      renderCardLongPressActionSettings(panel, b, helpers);
+      renderCoverStopOnMoveSetting(panel, b, helpers);
 
       if (opts.renderLabelInSettings && opts.labelAfterEntity) labelField();
 

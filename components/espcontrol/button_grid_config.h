@@ -326,6 +326,10 @@ inline bool action_card_option_select(const ParsedCfg &p) {
   return p.type == "action" && action_card_option_select_action(p.sensor);
 }
 
+inline bool cfg_entity_is_light(const std::string &entity_id) {
+  return entity_id.size() > 6 && entity_id.compare(0, 6, "light.") == 0;
+}
+
 inline bool cfg_option_token_present(const std::string &options, const char *name) {
   if (!name || !*name || options.empty()) return false;
   size_t start = 0;
@@ -772,6 +776,30 @@ inline void append_config_token(std::string &out, const std::string &token) {
   out += token;
 }
 
+inline void append_secondary_action_options(std::string &out,
+                                            const std::string &options,
+                                            const std::string &type,
+                                            const std::string &entity,
+                                            const std::string &sensor) {
+  bool supported = (type == "cover" && sensor == "toggle") ||
+                   type == "light_control" ||
+                   type == "light_switch" ||
+                   type == "light_brightness" ||
+                   type == "light_temperature" ||
+                   (type.empty() && cfg_entity_is_light(entity));
+  if (!supported) return;
+  std::string action = cfg_option_value(options, "long_press_action");
+  if ((action == "tap" || action == "none") &&
+      cfg_option_value(out, "long_press_action").empty()) {
+    append_config_token(out, "long_press_action=" + action);
+  }
+  if (type == "cover" && sensor == "toggle" &&
+      cfg_option_value(options, "cover_stop_on_move") == "off" &&
+      cfg_option_value(out, "cover_stop_on_move").empty()) {
+    append_config_token(out, "cover_stop_on_move=off");
+  }
+}
+
 inline std::string action_card_options_normalized(const std::string &options,
                                                   const std::string &action) {
   std::string out;
@@ -812,6 +840,7 @@ inline std::string action_card_options_normalized(const std::string &options,
 }
 
 inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
+  std::string original_options = p.options;
   // Slider cards used to store "h" here for horizontal layout. Sliders are
   // now always vertical, so treat any saved slider sensor value as legacy.
   if (brightness_slider_type(p.type) && !p.sensor.empty()) p.sensor.clear();
@@ -932,7 +961,6 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
     p.sensor.clear();
     p.unit.clear();
     p.precision.clear();
-    p.options.clear();
   }
   if (p.type == "subpage") {
     p.options = subpage_card_options_normalized(p.options, p.sensor, p.precision);
@@ -1009,6 +1037,12 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   if (p.type == "sensor") {
     p.options = sensor_card_options_normalized(p.options, p.precision);
   }
+  std::string secondary_options;
+  append_secondary_action_options(secondary_options, original_options, p.type, p.entity, p.sensor);
+  if (!secondary_options.empty()) {
+    if (!p.options.empty()) p.options += ",";
+    p.options += secondary_options;
+  }
   return p;
 }
 
@@ -1041,6 +1075,15 @@ inline ParsedCfg parse_cfg(const std::string &cfg) {
 
 inline bool cfg_option_enabled(const std::string &options, const char *name) {
   return cfg_option_token_present(options, name);
+}
+
+inline std::string button_long_press_action(const ParsedCfg &p) {
+  std::string action = cfg_option_value(p.options, "long_press_action");
+  return (action == "modal" || action == "tap" || action == "none") ? action : "modal";
+}
+
+inline bool cover_stop_on_move_enabled(const ParsedCfg &p) {
+  return cfg_option_value(p.options, "cover_stop_on_move") != "off";
 }
 
 inline int media_volume_max_percent(const ParsedCfg &p) {

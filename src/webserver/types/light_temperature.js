@@ -189,6 +189,7 @@ registerButtonType("light_temperature", {
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_TEMPERATURE_CARD_METADATA, {
       icon: false,
     });
+    renderCardLongPressActionSettings(panel, b, helpers);
 
     if (lightTempSensorNeedsCleanup(b.sensor)) {
       b.sensor = "";
@@ -286,6 +287,7 @@ registerButtonType("light_control", {
     renderLightControlTypeField(panel, b, helpers);
 
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_FULL_CONTROL_CARD_METADATA);
+    renderCardLongPressActionSettings(panel, b, helpers);
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Light";

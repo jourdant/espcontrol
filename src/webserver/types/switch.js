@@ -129,6 +129,7 @@ registerButtonType("", {
     var sensorMode = b.precision === "text" ? "text" : "numeric";
 
     helpers.renderBasicCardFields(panel, b, helpers, SWITCH_CARD_METADATA);
+    renderCardLongPressActionSettings(panel, b, helpers);
 
     var sensorToggle = helpers.renderCardOptionToggle(panel, b, helpers, SWITCH_CARD_METADATA.activeDisplay);
     var sensorSection = condField();
@@ -302,6 +303,7 @@ registerButtonType("light_switch", {
     renderLightControlTypeField(panel, b, helpers);
 
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_SWITCH_CARD_METADATA);
+    renderCardLongPressActionSettings(panel, b, helpers);
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Configure";

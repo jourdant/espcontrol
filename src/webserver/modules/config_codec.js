@@ -145,7 +145,7 @@ function normalizeButtonConfig(b) {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = appendSecondaryActionOptions("", b.options, b);
   }
   if (b && b.type === "subpage") {
     applySubpagePresetConfig(b);
@@ -239,6 +239,8 @@ var IMAGE_ICON_OPTION = "image_icon";
 var IMAGE_MODAL_MODE_OPTION = "image_modal_mode";
 var IMAGE_REFRESH_OPTION = "image_refresh";
 var IMAGE_REFRESH_MODE_OPTION = "image_refresh_mode";
+var LONG_PRESS_ACTION_OPTION = "long_press_action";
+var COVER_STOP_ON_MOVE_OPTION = "cover_stop_on_move";
 var IMAGE_CARD_LIMIT = Math.max(0, parseInt(CFG && CFG.imageCardLimit != null ? CFG.imageCardLimit : 4, 10) || 0);
 var ALARM_ACTIONS = [
   { value: "away", label: "Arm Away", service: "alarm_control_panel.alarm_arm_away", icon: "Shield Lock" },
@@ -324,6 +326,53 @@ function setConfigOptionValue(options, name, value) {
   value = String(value || "").trim();
   if (value) out.push(prefix + encodeConfigField(value));
   return out.join(",");
+}
+
+function normalizeLongPressAction(value) {
+  value = String(value || "modal");
+  return value === "tap" || value === "none" || value === "modal" ? value : "modal";
+}
+
+function cardSupportsLongPressAction(b) {
+  if (!b) return false;
+  return b.type === "cover" && normalizeCoverMode(b.sensor, true) === "toggle" ||
+    b.type === "light_control" ||
+    b.type === "light_switch" ||
+    b.type === "light_brightness" ||
+    b.type === "light_temperature" ||
+    (!b.type && String(b.entity || "").indexOf("light.") === 0);
+}
+
+function cardLongPressAction(b) {
+  return normalizeLongPressAction(configOptionValue(b && b.options, LONG_PRESS_ACTION_OPTION));
+}
+
+function setCardLongPressAction(b, action) {
+  if (!b) return "";
+  action = normalizeLongPressAction(action);
+  b.options = setConfigOptionValue(b.options, LONG_PRESS_ACTION_OPTION, action === "modal" ? "" : action);
+  return b.options;
+}
+
+function coverStopOnMoveEnabled(b) {
+  return configOptionValue(b && b.options, COVER_STOP_ON_MOVE_OPTION) !== "off";
+}
+
+function setCoverStopOnMoveEnabled(b, enabled) {
+  if (!b) return "";
+  b.options = setConfigOptionValue(b.options, COVER_STOP_ON_MOVE_OPTION, enabled ? "" : "off");
+  return b.options;
+}
+
+function appendSecondaryActionOptions(out, options, card) {
+  if (!cardSupportsLongPressAction(card)) return out;
+  var action = normalizeLongPressAction(configOptionValue(options, LONG_PRESS_ACTION_OPTION));
+  if (action !== "modal") out = setConfigOptionValue(out, LONG_PRESS_ACTION_OPTION, action);
+  if (card && card.type === "cover" && normalizeCoverMode(card.sensor, true) === "toggle" &&
+      configOptionValue(options, COVER_STOP_ON_MOVE_OPTION) === "off") {
+    out = setConfigOptionValue(out, COVER_STOP_ON_MOVE_OPTION, "off");
+  }
+  return out;
 }
 
 function largeNumbersExplicitlyDisabled(options) {
@@ -1413,7 +1462,8 @@ function buttonConfigFields(b) {
     if (!imageLabelEnabled(b)) label = "";
   }
   if (type === "door_window") precision = normalizeDoorWindowSubtype(precision);
-  var options = b && b.options || "";
+  var originalOptions = b && b.options || "";
+  var options = originalOptions;
   if (type === "") {
     options = normalizeSwitchConfirmationOptions(options);
   } else if (type === "alarm" || type === "alarm_action") {
@@ -1458,6 +1508,11 @@ function buttonConfigFields(b) {
       ? (icon && icon !== "Auto" ? icon : "Camera")
       : "Auto";
   }
+  options = appendSecondaryActionOptions(options, originalOptions, b && Object.assign({}, b, {
+    type: type,
+    sensor: sensor,
+    options: options,
+  }));
   if (type === "door_window") {
     b = b || {};
     b.entity = "";

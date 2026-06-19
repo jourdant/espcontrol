@@ -307,6 +307,39 @@ function renderCardOptionToggle(panel, b, helpers, metadata) {
   return row;
 }
 
+function renderCardLongPressActionSettings(panel, b, helpers) {
+  if (!cardSupportsLongPressAction(b)) return null;
+  var field = helpers.selectField(
+    "Long Press",
+    helpers.idPrefix + "long-press-action",
+    [
+      ["modal", "Open controls"],
+      ["tap", "Same as tap"],
+      ["none", "Do nothing"],
+    ],
+    cardLongPressAction(b),
+    function () {
+      setCardLongPressAction(b, this.value);
+      helpers.saveField("options", b.options);
+    }
+  );
+  panel.appendChild(field.field);
+  return field;
+}
+
+function renderCoverStopOnMoveSetting(panel, b, helpers) {
+  if (!b || b.type !== "cover" || normalizeCoverMode(b.sensor, true) !== "toggle") return null;
+  return helpers.renderCardOptionToggle(panel, b, helpers, {
+    label: "Tap moving cover to stop",
+    idSuffix: "cover-stop-on-move",
+    checked: function () { return coverStopOnMoveEnabled(b); },
+    onChange: function (button, cardHelpers, checked) {
+      setCoverStopOnMoveEnabled(button, checked);
+      cardHelpers.saveField("options", button.options);
+    },
+  });
+}
+
 function renderCardIconPair(panel, b, helpers, offMetadata, onMetadata) {
   return {
     off: helpers.renderCardIconPicker(panel, b, helpers, offMetadata),
