@@ -756,6 +756,7 @@ function renderButtonSettings(forceOpen) {
     saveField: saveField,
     applyCardMetadataFields: applyCardMetadataFields,
     renderCardModeSelector: renderCardModeSelector,
+    renderCardPressActionSelectors: renderCardPressActionSelectors,
     renderCardLargeNumbersToggle: renderCardLargeNumbersToggle,
     syncCardLargeNumbersToggle: syncCardLargeNumbersToggle,
     renderCardEntityField: renderCardEntityField,

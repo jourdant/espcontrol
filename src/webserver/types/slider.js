@@ -115,6 +115,7 @@ function sliderTypeFactory(opts) {
       if (opts.lightControlType) renderLightControlTypeField(panel, b, helpers);
 
       var coverMode = "";
+      var coverShortPressAction = "";
       var coverPositionField = null;
       var coverPositionInput = null;
       var singleIconSection = null;
@@ -164,6 +165,7 @@ function sliderTypeFactory(opts) {
       if (opts.interactionMode) {
         var storedCoverMode = normalizeCoverMode(b.sensor, true);
         coverMode = storedCoverMode;
+        coverShortPressAction = shortPressAction(b, coverMode);
         if (b.sensor !== storedCoverMode) {
           b.sensor = storedCoverMode;
           helpers.saveField("sensor", storedCoverMode);
@@ -182,7 +184,8 @@ function sliderTypeFactory(opts) {
 
         var interactionField = helpers.renderCardModeSelector(panel, b, helpers, {
           mode: Object.assign({}, metadata.coverInteraction.mode, {
-            value: function () { return coverMode; },
+            pressAction: true,
+            value: function () { return coverShortPressAction; },
             onChange: function () { setCoverMode(this.value, true); },
           }),
         });
@@ -206,7 +209,10 @@ function sliderTypeFactory(opts) {
 
         function setCoverMode(mode, persist) {
           coverMode = normalizeCoverMode(mode, true);
+          coverShortPressAction = coverMode;
           interactionSelect.value = coverMode;
+          setShortPressAction(b, coverMode);
+          helpers.saveField("options", b.options);
           if (coverMode === "set_position") {
             setCoverPosition(b.unit);
           } else if (b.unit) {
@@ -238,7 +244,6 @@ function sliderTypeFactory(opts) {
 
       helpers.renderCardEntityField(panel, b, helpers, metadata);
 
-      renderCardLongPressActionSettings(panel, b, helpers);
       renderCoverStopOnMoveSetting(panel, b, helpers);
 
       if (opts.renderLabelInSettings && opts.labelAfterEntity) labelField();

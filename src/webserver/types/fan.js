@@ -34,7 +34,7 @@ function fanControlBadgeIcon(type) {
 
 var FAN_CARD_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "fan-control-type",
     options: FAN_CONTROL_TYPE_OPTIONS,
     value: function (b) {
@@ -61,6 +61,7 @@ var FAN_CARD_METADATA = {
 
 function setFanControlType(b, type, helpers) {
   var nextType = normalizeFanControlType(type);
+  setShortPressAction(b, nextType);
   if (b.type === nextType) return;
   b.type = nextType;
   var td = BUTTON_TYPES[nextType];
@@ -78,6 +79,8 @@ function setFanControlType(b, type, helpers) {
 function renderFanControlTypeField(panel, b, helpers) {
   helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, FAN_CARD_METADATA, {
     mode: Object.assign({}, FAN_CARD_METADATA.mode, {
+      pressAction: true,
+      value: function (button) { return shortPressAction(button, normalizeFanControlType(button.type)); },
       onChange: function () {
       setFanControlType(b, this.value, helpers);
       },
@@ -98,7 +101,7 @@ function fanTypeFactory(opts) {
       b.sensor = "";
       b.unit = "";
       b.precision = "";
-      b.options = "";
+      b.options = appendPressActionOptions("", b.options);
       b.icon = fanControlDefaultIcon(opts.type);
       b.icon_on = opts.type === "fan_switch" ? "Fan" : "Auto";
     },
@@ -106,7 +109,7 @@ function fanTypeFactory(opts) {
       b.sensor = "";
       b.unit = "";
       b.precision = "";
-      b.options = "";
+      b.options = appendPressActionOptions("", b.options);
       if (!b.icon || b.icon === "Auto") b.icon = fanControlDefaultIcon(b.type);
       if (b.type === "fan_switch") {
         if (!b.icon_on || b.icon_on === "Auto") b.icon_on = "Fan";

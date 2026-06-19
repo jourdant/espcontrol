@@ -96,7 +96,7 @@ function setAlarmCardType(b, value, helpers) {
 
 var ALARM_CARD_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "alarm-card-type",
     options: alarmCardTypeOptionsForSettings,
     value: function (b) {
@@ -132,8 +132,16 @@ var ALARM_CARD_METADATA = {
 function renderAlarmCardTypeField(panel, b, helpers) {
   helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, ALARM_CARD_METADATA, {
     mode: Object.assign({}, ALARM_CARD_METADATA.mode, {
+      pressAction: true,
       options: alarmCardTypeOptionsForSettings(helpers.isSub),
+      value: function (button) {
+        var fallback = button.type === "alarm"
+          ? alarmControlPanelValue()
+          : (alarmActionInfo(button.sensor) || alarmActionSpecs()[0]).value;
+        return shortPressAction(button, fallback);
+      },
       onChange: function () {
+        setShortPressAction(b, this.value);
         setAlarmCardType(b, this.value, helpers);
       },
     }),
@@ -205,7 +213,7 @@ registerButtonType("alarm", {
     b.precision = "";
     b.icon = "Security";
     b.icon_on = "Auto";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
   },
   renderSettingsBeforeLabel: function (panel, b, slot, helpers) {
     renderAlarmCardTypeField(panel, b, helpers);
@@ -333,7 +341,7 @@ registerButtonType("alarm_action", {
     b.icon = info.icon;
     b.icon_on = "Auto";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
   },
   renderSettingsBeforeLabel: function (panel, b, slot, helpers) {
     b.sensor = alarmActionInfo(b.sensor) ? b.sensor : "away";

@@ -27,11 +27,12 @@ function normalizeActionCardConfig(b) {
   if (b && b.sensor === "select.select_option") b.sensor = ACTION_CARD_OPTION_SELECT_ACTION;
   if (!b.sensor) b.sensor = "scene.turn_on";
   if (!actionCardInfo(b.sensor)) b.sensor = "scene.turn_on";
+  var originalOptions = b.options || "";
   b.precision = "";
   if (actionCardStateDisplayMode(b) !== "icon") b.icon_on = "Auto";
   if (actionCardIsOptionSelect(b)) {
     b.unit = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", originalOptions);
     if (!b.icon || b.icon === "Auto" || b.icon === "Chevron Down") b.icon = "Flash";
   } else {
     b.options = normalizeActionOptions(b.options, b.sensor);
@@ -99,7 +100,7 @@ function actionCardNeedsExtraValue(value) {
 
 var ACTION_CARD_METADATA = {
   mode: {
-    label: "Action",
+    label: "Short Press",
     idSuffix: "action",
     options: ACTION_CARD_ACTIONS,
     value: function (b) {
@@ -177,23 +178,26 @@ registerButtonType("action", {
     b.icon = "Flash";
     b.icon_on = "Auto";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
   },
   renderSettingsBeforeLabel: function (panel, b, slot, helpers) {
     normalizeActionCardConfig(b);
 
     var actionField = helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, ACTION_CARD_METADATA, {
       mode: Object.assign({}, ACTION_CARD_METADATA.mode, {
+        pressAction: true,
+        value: function (button) { return shortPressAction(button, button.sensor || "scene.turn_on"); },
         onChange: function () {
           b.sensor = this.value;
+          setShortPressAction(b, b.sensor);
           helpers.saveField("sensor", b.sensor);
           if (!actionCardNeedsExtraValue(b.sensor)) {
             b.unit = "";
             helpers.saveField("unit", "");
           }
           if (actionCardIsOptionSelect(b)) {
-            b.options = "";
-            helpers.saveField("options", "");
+            b.options = appendPressActionOptions("", b.options);
+            helpers.saveField("options", b.options);
           } else {
             b.options = normalizeActionOptions(b.options, b.sensor);
             helpers.saveField("options", b.options);
@@ -202,6 +206,7 @@ registerButtonType("action", {
           b.precision = "";
           helpers.saveField("icon_on", "Auto");
           helpers.saveField("precision", "");
+          helpers.saveField("options", b.options || "");
           renderButtonSettings();
         },
       }),

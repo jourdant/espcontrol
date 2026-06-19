@@ -29,7 +29,7 @@ function lockUsesDefaultIcon(icon) {
 
 var LOCK_CARD_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "lock-type",
     options: [
       ["", "Toggle"],
@@ -94,17 +94,20 @@ registerButtonType("lock", {
 
     helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, LOCK_CARD_METADATA, {
       mode: Object.assign({}, LOCK_CARD_METADATA.mode, {
-        value: function () { return mode; },
+        pressAction: true,
+        value: function () { return shortPressAction(b, mode); },
         onChange: function () {
           var oldMode = mode;
           var hadDefaultIcon = lockUsesDefaultIcon(b.icon);
           mode = normalizeLockMode(this.value);
           b.sensor = mode;
+          setShortPressAction(b, mode);
           helpers.saveField("sensor", mode);
           b.unit = "";
           b.precision = "";
           helpers.saveField("unit", "");
           helpers.saveField("precision", "");
+          helpers.saveField("options", b.options || "");
           if (hadDefaultIcon || b.icon === lockModeDefaultIcon(oldMode)) {
             b.icon = lockModeDefaultIcon(mode);
             helpers.saveField("icon", b.icon);

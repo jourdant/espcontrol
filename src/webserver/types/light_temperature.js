@@ -81,7 +81,7 @@ var LIGHT_CONTROL_TYPE_OPTIONS = [
 
 var LIGHT_CONTROL_TYPE_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "light-control-type",
     options: function (b) {
       return LIGHT_CONTROL_TYPE_OPTIONS;
@@ -147,6 +147,7 @@ function normalizeLightControlType(type) {
 
 function setLightControlType(b, type, helpers) {
   var nextType = normalizeLightControlType(type);
+  setShortPressAction(b, nextType);
   if (b.type === nextType) return;
   b.type = nextType;
   var td = BUTTON_TYPES[nextType];
@@ -157,11 +158,17 @@ function setLightControlType(b, type, helpers) {
   helpers.saveField("precision", b.precision || "");
   helpers.saveField("icon", b.icon || "Auto");
   helpers.saveField("icon_on", b.icon_on || "Auto");
+  helpers.saveField("options", b.options || "");
   renderButtonSettings();
 }
 
 function renderLightControlTypeField(panel, b, helpers) {
-  return helpers.renderCardModeSelector(panel, b, helpers, LIGHT_CONTROL_TYPE_METADATA);
+  return helpers.renderCardModeSelector(panel, b, helpers, {
+    mode: Object.assign({}, LIGHT_CONTROL_TYPE_METADATA.mode, {
+      pressAction: true,
+      value: function (button) { return shortPressAction(button, normalizeLightControlType(button.type)); },
+    }),
+  });
 }
 
 registerButtonType("light_temperature", {
@@ -189,7 +196,6 @@ registerButtonType("light_temperature", {
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_TEMPERATURE_CARD_METADATA, {
       icon: false,
     });
-    renderCardLongPressActionSettings(panel, b, helpers);
 
     if (lightTempSensorNeedsCleanup(b.sensor)) {
       b.sensor = "";
@@ -279,7 +285,7 @@ registerButtonType("light_control", {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
     b.icon = "Lightbulb Outline";
     b.icon_on = "Lightbulb";
   },
@@ -287,7 +293,6 @@ registerButtonType("light_control", {
     renderLightControlTypeField(panel, b, helpers);
 
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_FULL_CONTROL_CARD_METADATA);
-    renderCardLongPressActionSettings(panel, b, helpers);
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Light";

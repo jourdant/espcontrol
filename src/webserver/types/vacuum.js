@@ -56,17 +56,18 @@ function vacuumUsesDefaultIcon(icon) {
 
 function normalizeVacuumConfig(b) {
   if (!b) return;
+  var originalOptions = b.options || "";
   b.sensor = normalizeVacuumMode(b.sensor);
   if (!vacuumModeNeedsArea(b.sensor)) b.unit = "";
   b.precision = "";
-  b.options = "";
+  b.options = appendPressActionOptions("", originalOptions);
   b.icon_on = "Auto";
   if (!b.icon || b.icon === "Auto") b.icon = vacuumModeDefaultIcon(b.sensor);
 }
 
 var VACUUM_CARD_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "vacuum-type",
     options: VACUUM_CARD_MODES,
     value: function (b) {
@@ -103,7 +104,7 @@ registerButtonType("vacuum", {
     b.sensor = "start_stop";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
     b.icon = "Robot Vacuum";
     b.icon_on = "Auto";
   },
@@ -114,7 +115,7 @@ registerButtonType("vacuum", {
       helpers.saveField("sensor", mode);
     }
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
     b.icon_on = "Auto";
     if (!vacuumModeNeedsArea(mode) && b.unit) {
       b.unit = "";
@@ -127,15 +128,18 @@ registerButtonType("vacuum", {
 
     helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, VACUUM_CARD_METADATA, {
       mode: Object.assign({}, VACUUM_CARD_METADATA.mode, {
-        value: function () { return mode; },
+        pressAction: true,
+        value: function () { return shortPressAction(b, mode); },
         onChange: function () {
           var oldMode = mode;
           var hadDefaultIcon = vacuumUsesDefaultIcon(b.icon);
           mode = normalizeVacuumMode(this.value);
           b.sensor = mode;
+          setShortPressAction(b, mode);
           helpers.saveField("sensor", mode);
           b.precision = "";
-          b.options = "";
+          b.options = appendPressActionOptions("", b.options);
+          setShortPressAction(b, mode);
           b.icon_on = "Auto";
           helpers.saveField("precision", "");
           helpers.saveField("options", "");

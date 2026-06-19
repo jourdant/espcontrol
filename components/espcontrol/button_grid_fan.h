@@ -351,6 +351,14 @@ inline void fan_card_handle_click(FanCardCtx *ctx) {
   else if (ctx->type == "fan_preset") fan_preset_open(ctx);
 }
 
+inline void fan_card_handle_action(FanCardCtx *ctx, const std::string &type) {
+  if (!ctx) return;
+  std::string original = ctx->type;
+  ctx->type = type;
+  fan_card_handle_click(ctx);
+  ctx->type = original;
+}
+
 inline FanCardCtx *create_fan_card_context(
     BtnSlot &slot, const ParsedCfg &p,
     uint32_t on_color, uint32_t off_color, uint32_t tertiary_color,

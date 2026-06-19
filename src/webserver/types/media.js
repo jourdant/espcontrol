@@ -50,7 +50,7 @@ function mediaNowPlayingPlayPauseEnabled(b) {
 
 var MEDIA_CARD_METADATA = {
   mode: {
-    label: "Type",
+    label: "Short Press",
     idSuffix: "media-mode",
     options: [
       ["play_pause", "Play/Pause Button"],
@@ -119,7 +119,7 @@ registerButtonType("media", {
     b.precision = (b.sensor === "play_pause" || b.sensor === "position") && b.precision === "state" ? "state" : "";
     b.icon = "Auto";
     b.icon_on = "Auto";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
   },
   renderSettingsBeforeLabel: function (panel, b, slot, helpers) {
     function validMode(value) {
@@ -157,9 +157,13 @@ registerButtonType("media", {
 
     helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, MEDIA_CARD_METADATA, {
       mode: Object.assign({}, MEDIA_CARD_METADATA.mode, {
+        pressAction: true,
+        value: function (button) { return shortPressAction(button, mediaEditorValidMode(button.sensor)); },
         onChange: function () {
           var oldMode = b.sensor;
           b.sensor = validMode(this.value);
+          setShortPressAction(b, b.sensor);
+          helpers.saveField("options", b.options || "");
           if (isMediaDefaultIcon(oldMode, b.icon)) {
             b.icon = "Auto";
             helpers.saveField("icon", b.icon);

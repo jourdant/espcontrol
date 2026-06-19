@@ -129,7 +129,16 @@ registerButtonType("", {
     var sensorMode = b.precision === "text" ? "text" : "numeric";
 
     helpers.renderBasicCardFields(panel, b, helpers, SWITCH_CARD_METADATA);
-    renderCardLongPressActionSettings(panel, b, helpers);
+    helpers.renderCardPressActionSelectors(panel, b, helpers, {
+      pressActions: {
+        options: function () {
+          return String(b.entity || "").indexOf("light.") === 0
+            ? [["toggle", "Toggle"], ["modal", "Modal"]]
+            : [["toggle", "Toggle"]];
+        },
+        fallbackValue: "toggle",
+      },
+    });
 
     var sensorToggle = helpers.renderCardOptionToggle(panel, b, helpers, SWITCH_CARD_METADATA.activeDisplay);
     var sensorSection = condField();
@@ -295,7 +304,7 @@ registerButtonType("light_switch", {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
     b.icon = "Lightbulb Outline";
     b.icon_on = "Lightbulb";
   },
@@ -303,7 +312,6 @@ registerButtonType("light_switch", {
     renderLightControlTypeField(panel, b, helpers);
 
     helpers.renderBasicCardFields(panel, b, helpers, LIGHT_SWITCH_CARD_METADATA);
-    renderCardLongPressActionSettings(panel, b, helpers);
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Configure";

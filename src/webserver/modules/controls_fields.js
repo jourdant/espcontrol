@@ -169,17 +169,66 @@ function applyCardMetadataFields(b, helpers, fields) {
 function renderCardModeSelector(panel, b, helpers, metadata) {
   metadata = metadata || {};
   var mode = metadata.mode || {};
+  var currentValue = cardMetadataValue(mode.value, b, helpers) || "";
+  var options = cardMetadataValue(mode.options, b, helpers) || [];
   var field = helpers.selectField(
-    mode.label || "Type",
+    mode.pressAction ? "Short Press" : (mode.label || "Type"),
     helpers.idPrefix + (mode.idSuffix || "mode"),
-    cardMetadataValue(mode.options, b, helpers) || [],
-    cardMetadataValue(mode.value, b, helpers) || "",
+    options,
+    currentValue,
     function () {
       if (mode.onChange) mode.onChange.call(this, b, helpers);
     }
   );
   panel.appendChild(field.field);
+  if (mode.pressAction) {
+    var longField = helpers.selectField(
+      "Long Press",
+      helpers.idPrefix + (mode.longIdSuffix || (mode.idSuffix || "mode") + "-long"),
+      options,
+      longPressAction(b, currentValue),
+      function () {
+        setLongPressAction(b, this.value, currentValue);
+        helpers.saveField("options", b.options);
+      }
+    );
+    panel.appendChild(longField.field);
+    field.longSelect = longField.select;
+    field.longField = longField.field;
+  }
   return field;
+}
+
+function renderCardPressActionSelectors(panel, b, helpers, metadata) {
+  metadata = metadata || {};
+  var press = metadata.pressActions || {};
+  var options = cardMetadataValue(press.options, b, helpers) || [];
+  var fallback = cardMetadataValue(press.fallbackValue, b, helpers) || "";
+  var shortField = helpers.selectField(
+    press.shortLabel || "Short Press",
+    helpers.idPrefix + (press.shortIdSuffix || "short-press"),
+    options,
+    shortPressAction(b, fallback),
+    function () {
+      setShortPressAction(b, this.value);
+      helpers.saveField("options", b.options);
+      if (press.onShortChange) press.onShortChange.call(this, b, helpers);
+    }
+  );
+  panel.appendChild(shortField.field);
+  var longField = helpers.selectField(
+    press.longLabel || "Long Press",
+    helpers.idPrefix + (press.longIdSuffix || "long-press"),
+    options,
+    longPressAction(b, shortField.select.value),
+    function () {
+      setLongPressAction(b, this.value, shortField.select.value);
+      helpers.saveField("options", b.options);
+      if (press.onLongChange) press.onLongChange.call(this, b, helpers);
+    }
+  );
+  panel.appendChild(longField.field);
+  return { shortField: shortField, longField: longField };
 }
 
 function renderCardLargeNumbersToggle(panel, b, helpers, metadata) {

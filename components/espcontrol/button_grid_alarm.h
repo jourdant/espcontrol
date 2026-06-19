@@ -1077,6 +1077,27 @@ inline void alarm_action_activate(AlarmActionCtx *action) {
   send_alarm_action(action, "");
 }
 
+inline void alarm_action_activate_mode(void *user_data, const std::string &mode) {
+  AlarmActionCtx *action = static_cast<AlarmActionCtx *>(user_data);
+  if (alarm_action_context_valid(action)) {
+    std::string original_mode = action->mode;
+    bool original_requires_pin = action->requires_pin;
+    action->mode = alarm_action_valid(mode) ? mode : original_mode;
+    action->requires_pin = alarm_action_requires_pin(action->card->options, action->mode);
+    alarm_action_activate(action);
+    action->mode = original_mode;
+    action->requires_pin = original_requires_pin;
+    return;
+  }
+  AlarmCardCtx *card = static_cast<AlarmCardCtx *>(user_data);
+  if (!alarm_card_context_valid(card)) return;
+  AlarmActionCtx fallback;
+  fallback.card = card;
+  fallback.mode = alarm_action_valid(mode) ? mode : "away";
+  fallback.requires_pin = alarm_action_requires_pin(card->options, fallback.mode);
+  alarm_action_activate(&fallback);
+}
+
 inline lv_obj_t *alarm_control_create_mode_button(
     lv_obj_t *parent,
     AlarmCardCtx *ctx,

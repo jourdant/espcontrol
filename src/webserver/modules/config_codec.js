@@ -10,6 +10,7 @@ var SENSOR_STATE_HIGH_LABEL_OPTION = "state_high_label";
 var CARD_ON_PATTERN_OPTION = "on_pattern";
 
 function normalizeButtonConfig(b) {
+  var originalOptions = b && b.options || "";
   if (b) b.options = b.options || "";
   if (b && b.type === "action" && b.sensor === "vacuum.start") {
     b.type = "vacuum";
@@ -36,7 +37,7 @@ function normalizeButtonConfig(b) {
     b.sensor = "";
     b.unit = "";
     b.precision = "";
-    b.options = "";
+    b.options = appendPressActionOptions("", originalOptions);
     if (!b.icon || b.icon === "Auto") b.icon = fanCardDefaultIcon(b.type);
     if (b.type === "fan_switch") {
       if (!b.icon_on || b.icon_on === "Auto") b.icon_on = "Fan";
@@ -240,6 +241,8 @@ var IMAGE_MODAL_MODE_OPTION = "image_modal_mode";
 var IMAGE_REFRESH_OPTION = "image_refresh";
 var IMAGE_REFRESH_MODE_OPTION = "image_refresh_mode";
 var LONG_PRESS_ACTION_OPTION = "long_press_action";
+var SHORT_PRESS_OPTION = "short_press";
+var LONG_PRESS_OPTION = "long_press";
 var COVER_STOP_ON_MOVE_OPTION = "cover_stop_on_move";
 var IMAGE_CARD_LIMIT = Math.max(0, parseInt(CFG && CFG.imageCardLimit != null ? CFG.imageCardLimit : 4, 10) || 0);
 var ALARM_ACTIONS = [
@@ -328,6 +331,50 @@ function setConfigOptionValue(options, name, value) {
   return out.join(",");
 }
 
+function normalizePressActionValue(value) {
+  return String(value || "").trim();
+}
+
+function shortPressAction(b, fallback) {
+  var value = normalizePressActionValue(configOptionValue(b && b.options, SHORT_PRESS_OPTION));
+  return value || String(fallback || "");
+}
+
+function longPressAction(b, fallback) {
+  var value = normalizePressActionValue(configOptionValue(b && b.options, LONG_PRESS_OPTION));
+  if (value) return value;
+  var legacy = configOptionValue(b && b.options, LONG_PRESS_ACTION_OPTION);
+  if (legacy === "none") return "__none";
+  if (legacy === "tap") return String(fallback || "");
+  if (legacy === "modal") return "modal";
+  return String(fallback || "");
+}
+
+function setShortPressAction(b, value) {
+  if (!b) return "";
+  b.options = setConfigOptionValue(b.options, SHORT_PRESS_OPTION, normalizePressActionValue(value));
+  return b.options;
+}
+
+function setLongPressAction(b, value, fallback) {
+  if (!b) return "";
+  value = normalizePressActionValue(value);
+  fallback = normalizePressActionValue(fallback);
+  b.options = setConfigOptionValue(b.options, LONG_PRESS_ACTION_OPTION, "");
+  b.options = setConfigOptionValue(b.options, LONG_PRESS_OPTION, value && value !== fallback ? value : "");
+  return b.options;
+}
+
+function appendPressActionOptions(out, options) {
+  var shortAction = normalizePressActionValue(configOptionValue(options, SHORT_PRESS_OPTION));
+  var longAction = normalizePressActionValue(configOptionValue(options, LONG_PRESS_OPTION));
+  var legacyLong = normalizePressActionValue(configOptionValue(options, LONG_PRESS_ACTION_OPTION));
+  if (shortAction) out = setConfigOptionValue(out, SHORT_PRESS_OPTION, shortAction);
+  if (longAction) out = setConfigOptionValue(out, LONG_PRESS_OPTION, longAction);
+  if (!longAction && legacyLong) out = setConfigOptionValue(out, LONG_PRESS_ACTION_OPTION, legacyLong);
+  return out;
+}
+
 function normalizeLongPressAction(value) {
   value = String(value || "modal");
   return value === "tap" || value === "none" || value === "modal" ? value : "modal";
@@ -365,6 +412,7 @@ function setCoverStopOnMoveEnabled(b, enabled) {
 }
 
 function appendSecondaryActionOptions(out, options, card) {
+  out = appendPressActionOptions(out, options);
   if (!cardSupportsLongPressAction(card)) return out;
   var action = normalizeLongPressAction(configOptionValue(options, LONG_PRESS_ACTION_OPTION));
   if (action !== "modal") out = setConfigOptionValue(out, LONG_PRESS_ACTION_OPTION, action);

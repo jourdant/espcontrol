@@ -781,6 +781,14 @@ inline void append_secondary_action_options(std::string &out,
                                             const std::string &type,
                                             const std::string &entity,
                                             const std::string &sensor) {
+  std::string short_action = cfg_option_value(options, "short_press");
+  if (!short_action.empty() && cfg_option_value(out, "short_press").empty()) {
+    append_config_token(out, "short_press=" + encode_compact_field(short_action));
+  }
+  std::string long_action = cfg_option_value(options, "long_press");
+  if (!long_action.empty() && cfg_option_value(out, "long_press").empty()) {
+    append_config_token(out, "long_press=" + encode_compact_field(long_action));
+  }
   bool supported = (type == "cover" && sensor == "toggle") ||
                    type == "light_control" ||
                    type == "light_switch" ||
@@ -1080,6 +1088,30 @@ inline bool cfg_option_enabled(const std::string &options, const char *name) {
 inline std::string button_long_press_action(const ParsedCfg &p) {
   std::string action = cfg_option_value(p.options, "long_press_action");
   return (action == "modal" || action == "tap" || action == "none") ? action : "modal";
+}
+
+inline std::string card_short_press_action(const ParsedCfg &p) {
+  std::string action = cfg_option_value(p.options, "short_press");
+  if (!action.empty()) return action;
+  if (p.type == "alarm") return "control_panel";
+  if (p.type == "alarm_action") return p.sensor.empty() ? "away" : p.sensor;
+  if (p.type == "cover" || p.type == "garage" || p.type == "lock" ||
+      p.type == "media" || p.type == "vacuum" || fan_card_type(p.type) ||
+      p.type == "action") return p.sensor;
+  if (p.type == "light_control" || p.type == "light_switch" ||
+      p.type == "light_brightness" || p.type == "light_temperature") return p.type;
+  if (p.type.empty()) return "toggle";
+  return "";
+}
+
+inline std::string card_long_press_action(const ParsedCfg &p) {
+  std::string action = cfg_option_value(p.options, "long_press");
+  if (!action.empty()) return action;
+  std::string legacy = cfg_option_value(p.options, "long_press_action");
+  if (legacy == "none") return "__none";
+  if (legacy == "tap") return card_short_press_action(p);
+  if (legacy == "modal") return "modal";
+  return card_short_press_action(p);
 }
 
 inline bool cover_stop_on_move_enabled(const ParsedCfg &p) {

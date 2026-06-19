@@ -29,7 +29,7 @@ function garageUsesDefaultIcon(icon) {
 
 var GARAGE_CARD_METADATA = {
   mode: {
-    label: "Interaction",
+    label: "Short Press",
     idSuffix: "garage-interaction",
     options: [
       ["", "Toggle"],
@@ -82,7 +82,7 @@ registerButtonType("garage", {
     b.precision = "";
     b.icon = "Garage";
     b.icon_on = "Garage Open";
-    b.options = "";
+    b.options = appendPressActionOptions("", b.options);
   },
   renderSettings: function (panel, b, slot, helpers) {
     var mode = normalizeGarageMode(b.sensor);
@@ -107,12 +107,14 @@ registerButtonType("garage", {
 
     helpers.renderCardModeSelector(panel, b, helpers, Object.assign({}, GARAGE_CARD_METADATA, {
       mode: Object.assign({}, GARAGE_CARD_METADATA.mode, {
-        value: function () { return mode; },
+        pressAction: true,
+        value: function () { return shortPressAction(b, mode); },
         onChange: function () {
           var oldMode = mode;
           var hadDefaultIcon = garageUsesDefaultIcon(b.icon);
           mode = normalizeGarageMode(this.value);
           b.sensor = mode;
+          setShortPressAction(b, mode);
           helpers.saveField("sensor", mode);
           b.unit = "";
           b.precision = "";
