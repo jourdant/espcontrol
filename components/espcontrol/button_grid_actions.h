@@ -629,7 +629,7 @@ inline void handle_button_long_press(const std::string &cfg, int slot_num,
   if (media_fast_press_consume(slot_num)) return;
   if (btn_obj && lv_obj_has_state(btn_obj, LV_STATE_DISABLED)) return;
   ParsedCfg p = parse_cfg(cfg);
-  if (handle_button_secondary_action(p, btn_obj)) return;
+  if (handle_button_secondary_action(p, slot_num, btn_obj)) return;
   ESP_LOGD("button", "Treating grid card long press as normal tap for slot %d", slot_num);
   handle_button_click(cfg, slot_num, btn_obj);
 }
