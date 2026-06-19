@@ -520,7 +520,7 @@ inline void button_long_press_arc_set_value(void *obj, int32_t value) {
 
 inline void button_long_press_indicator_hide_timer(lv_timer_t *timer) {
   if (!timer) return;
-  lv_obj_t *arc = static_cast<lv_obj_t *>(timer->user_data);
+  lv_obj_t *arc = static_cast<lv_obj_t *>(lv_timer_get_user_data(timer));
   if (arc) lv_obj_add_flag(arc, LV_OBJ_FLAG_HIDDEN);
   lv_timer_del(timer);
 }
