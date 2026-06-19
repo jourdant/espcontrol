@@ -100,7 +100,7 @@ function actionCardNeedsExtraValue(value) {
 
 var ACTION_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "action",
     options: ACTION_CARD_ACTIONS,
     value: function (b) {

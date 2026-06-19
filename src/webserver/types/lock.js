@@ -29,7 +29,7 @@ function lockUsesDefaultIcon(icon) {
 
 var LOCK_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "lock-type",
     options: [
       ["", "Toggle"],

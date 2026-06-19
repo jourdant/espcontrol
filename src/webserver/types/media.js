@@ -50,7 +50,7 @@ function mediaNowPlayingPlayPauseEnabled(b) {
 
 var MEDIA_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "media-mode",
     options: [
       ["play_pause", "Play/Pause Button"],

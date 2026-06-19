@@ -34,7 +34,7 @@ function fanControlBadgeIcon(type) {
 
 var FAN_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "fan-control-type",
     options: FAN_CONTROL_TYPE_OPTIONS,
     value: function (b) {

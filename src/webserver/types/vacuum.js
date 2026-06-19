@@ -67,7 +67,7 @@ function normalizeVacuumConfig(b) {
 
 var VACUUM_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "vacuum-type",
     options: VACUUM_CARD_MODES,
     value: function (b) {

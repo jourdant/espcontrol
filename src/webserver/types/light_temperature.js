@@ -81,7 +81,7 @@ var LIGHT_CONTROL_TYPE_OPTIONS = [
 
 var LIGHT_CONTROL_TYPE_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "light-control-type",
     options: function (b) {
       return LIGHT_CONTROL_TYPE_OPTIONS;

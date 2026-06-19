@@ -172,7 +172,7 @@ function renderCardModeSelector(panel, b, helpers, metadata) {
   var currentValue = cardMetadataValue(mode.value, b, helpers) || "";
   var options = cardMetadataValue(mode.options, b, helpers) || [];
   var field = helpers.selectField(
-    mode.pressAction ? "Short Press" : (mode.label || "Type"),
+    mode.pressAction ? "Short Press Action" : (mode.label || "Type"),
     helpers.idPrefix + (mode.idSuffix || "mode"),
     options,
     currentValue,
@@ -183,7 +183,7 @@ function renderCardModeSelector(panel, b, helpers, metadata) {
   panel.appendChild(field.field);
   if (mode.pressAction) {
     var longField = helpers.selectField(
-      "Long Press",
+      "Long Press Action",
       helpers.idPrefix + (mode.longIdSuffix || (mode.idSuffix || "mode") + "-long"),
       options,
       longPressAction(b, currentValue),
@@ -205,7 +205,7 @@ function renderCardPressActionSelectors(panel, b, helpers, metadata) {
   var options = cardMetadataValue(press.options, b, helpers) || [];
   var fallback = cardMetadataValue(press.fallbackValue, b, helpers) || "";
   var shortField = helpers.selectField(
-    press.shortLabel || "Short Press",
+    press.shortLabel || "Short Press Action",
     helpers.idPrefix + (press.shortIdSuffix || "short-press"),
     options,
     shortPressAction(b, fallback),
@@ -217,7 +217,7 @@ function renderCardPressActionSelectors(panel, b, helpers, metadata) {
   );
   panel.appendChild(shortField.field);
   var longField = helpers.selectField(
-    press.longLabel || "Long Press",
+    press.longLabel || "Long Press Action",
     helpers.idPrefix + (press.longIdSuffix || "long-press"),
     options,
     longPressAction(b, shortField.select.value),

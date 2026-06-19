@@ -96,7 +96,7 @@ function setAlarmCardType(b, value, helpers) {
 
 var ALARM_CARD_METADATA = {
   mode: {
-    label: "Short Press",
+    label: "Short Press Action",
     idSuffix: "alarm-card-type",
     options: alarmCardTypeOptionsForSettings,
     value: function (b) {
