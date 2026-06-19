@@ -37,8 +37,24 @@ esphome:
             set_display_temperature_degree_symbol(id(temperature_degree_symbol_enabled).state);
         - script.execute: clock_bar_hide
         - script.execute: clock_bar_apply
+        - script.execute: apply_long_press_time
 
 script:
+  - id: apply_long_press_time
+    mode: restart
+    then:
+      - lambda: |-
+          float seconds = id(long_press_time).state;
+          if (std::isnan(seconds) || seconds < 1.0f) seconds = 2.0f;
+          if (seconds > 5.0f) seconds = 5.0f;
+          uint16_t ms = static_cast<uint16_t>(seconds * 1000.0f + 0.5f);
+          lv_indev_t *indev = nullptr;
+          while ((indev = lv_indev_get_next(indev)) != nullptr) {
+            if (lv_indev_get_type(indev) == LV_INDEV_TYPE_POINTER) {
+              lv_indev_set_long_press_time(indev, ms);
+            }
+          }
+
   - id: clock_bar_hide
     mode: restart
     then:
@@ -922,3 +938,23 @@ number:
     icon: "mdi:home-clock"
     web_server:
       sorting_group_id: sg_screensaver
+
+  # Button/card long-press duration
+  - platform: template
+    name: "${entity_long_press_time}"
+    internal: true
+    id: long_press_time
+    min_value: 1
+    max_value: 5
+    step: 0.25
+    initial_value: 2
+    restore_value: true
+    optimistic: true
+    unit_of_measurement: "s"
+    entity_category: config
+    icon: "mdi:gesture-tap-hold"
+    web_server:
+      sorting_group_id: sg_display
+    on_value:
+      then:
+        - script.execute: apply_long_press_time

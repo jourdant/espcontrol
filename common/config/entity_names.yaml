@@ -36,6 +36,7 @@ substitutions:
   entity_screen_network_status_icon: "Screen: Network Status Icon"
   entity_screen_temperature_degree_symbol: "Screen: Temperature Degree Symbol"
   entity_screen_subpage_chevron: "Screen: Subpage Chevron"
+  entity_long_press_time: "Long Press Time"
   entity_screen_temperature_unit: "Screen: Temperature Unit"
   entity_indoor_temp_entity: "Indoor Temp Entity"
   entity_outdoor_temp_entity: "Outdoor Temp Entity"

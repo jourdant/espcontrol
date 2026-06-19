@@ -24,6 +24,7 @@
     { "key": "screen_network_status_icon", "domain": "switch", "name": "Screen: Network Status Icon", "objectIds": ["screen__network_status_icon", "screen_network_status_icon", "network_status_enabled"], "groups": ["settings"] },
     { "key": "screen_temperature_degree_symbol", "domain": "switch", "name": "Screen: Temperature Degree Symbol", "objectIds": ["screen__temperature_degree_symbol", "screen_temperature_degree_symbol", "temperature_degree_symbol_enabled"], "groups": ["settings"] },
     { "key": "screen_subpage_chevron", "domain": "switch", "name": "Screen: Subpage Chevron", "objectIds": ["screen__subpage_chevron", "screen_subpage_chevron", "subpage_chevrons_enabled"], "groups": ["settings"] },
+    { "key": "long_press_time", "domain": "number", "name": "Long Press Time", "objectIds": ["long_press_time", "screen__long_press_time", "screen_long_press_time"], "groups": ["settings"] },
     { "key": "screen_temperature_unit", "domain": "select", "name": "Screen: Temperature Unit", "groups": ["settings"] },
     { "key": "indoor_temp_entity", "domain": "text", "name": "Indoor Temp Entity", "groups": ["settings"] },
     { "key": "outdoor_temp_entity", "domain": "text", "name": "Outdoor Temp Entity", "groups": ["settings"] },

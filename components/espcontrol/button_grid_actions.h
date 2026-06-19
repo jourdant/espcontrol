@@ -191,6 +191,10 @@ inline bool is_cover_entity(const std::string &entity_id) {
   return entity_id.size() > 6 && entity_id.compare(0, 6, "cover.") == 0;
 }
 
+inline bool is_light_entity(const std::string &entity_id) {
+  return entity_id.size() > 6 && entity_id.compare(0, 6, "light.") == 0;
+}
+
 inline bool is_fan_entity(const std::string &entity_id) {
   return entity_id.size() > 4 && entity_id.compare(0, 4, "fan.") == 0;
 }
@@ -527,6 +531,39 @@ struct CoverControlCtx;
 inline void cover_control_open_modal(CoverControlCtx *ctx);
 struct LightControlCtx;
 inline void light_control_open_modal(LightControlCtx *ctx);
+inline void handle_button_click(const std::string &cfg, int slot_num,
+                                lv_obj_t *btn_obj);
+
+inline bool handle_button_secondary_action(const ParsedCfg &p, lv_obj_t *btn_obj) {
+  if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
+    CoverControlCtx *ctx = (CoverControlCtx *)lv_obj_get_user_data(btn_obj);
+    if (ctx) {
+      cover_control_open_modal(ctx);
+      return true;
+    }
+  } else if (p.type == "light_control" ||
+             p.type == "light_switch" ||
+             p.type == "light_brightness" ||
+             p.type == "light_temperature" ||
+             (p.type.empty() && is_light_entity(p.entity))) {
+    LightControlCtx *ctx = (LightControlCtx *)lv_obj_get_user_data(btn_obj);
+    if (ctx) {
+      light_control_open_modal(ctx);
+      return true;
+    }
+  }
+  return false;
+}
+
+inline void handle_button_long_press(const std::string &cfg, int slot_num,
+                                     lv_obj_t *btn_obj) {
+  if (media_fast_press_consume(slot_num)) return;
+  if (btn_obj && lv_obj_has_state(btn_obj, LV_STATE_DISABLED)) return;
+  ParsedCfg p = parse_cfg(cfg);
+  if (handle_button_secondary_action(p, btn_obj)) return;
+  ESP_LOGD("button", "Treating grid card long press as normal tap for slot %d", slot_num);
+  handle_button_click(cfg, slot_num, btn_obj);
+}
 
 // Handle a main-grid button press: dispatch push event, subpage nav,
 // slider toggle, or entity toggle based on the config string.
@@ -573,8 +610,7 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
     CoverControlCtx *ctx = (CoverControlCtx *)lv_obj_get_user_data(btn_obj);
     if (ctx) cover_control_open_modal(ctx);
   } else if (p.type == "light_control") {
-    LightControlCtx *ctx = (LightControlCtx *)lv_obj_get_user_data(btn_obj);
-    if (ctx) light_control_open_modal(ctx);
+    if (!p.entity.empty()) send_toggle_action(p.entity);
   } else if (p.type == "garage") {
     if (garage_command_mode(p.sensor)) {
       send_cover_command_action(p);
@@ -596,6 +632,10 @@ inline void handle_button_click(const std::string &cfg, int slot_num,
     send_cover_command_action(p);
   } else if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
     if (!p.entity.empty()) {
+      if (btn_obj && lv_obj_has_state(btn_obj, LV_STATE_USER_1)) {
+        send_cover_command_action(p.entity, "stop");
+        return;
+      }
       set_card_checked_state(btn_obj, true);
       send_toggle_action(p.entity);
     }

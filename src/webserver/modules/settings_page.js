@@ -890,6 +890,38 @@ function buildSettingsPage(parent) {
   els.setIdleBadge = idleBadge;
   syncIdleUi();
   var idleCard = makeCollapsibleCard("Idle", idleBody, true, idleBadge);
+
+  var touchBody = document.createElement("div");
+  touchBody.appendChild(fieldLabel("Long Press Time", "sp-set-long-press-time"));
+  var longPressRow = document.createElement("div");
+  longPressRow.className = "sp-range-row";
+  var longPressRange = document.createElement("input");
+  longPressRange.type = "range";
+  longPressRange.className = "sp-range";
+  longPressRange.id = "sp-set-long-press-time";
+  longPressRange.min = "1";
+  longPressRange.max = "5";
+  longPressRange.step = "0.25";
+  longPressRange.value = String(normalizeLongPressTime(state.longPressTime));
+  var longPressVal = document.createElement("span");
+  longPressVal.className = "sp-range-val";
+  longPressVal.textContent = normalizeLongPressTime(state.longPressTime) + "s";
+  longPressRange.addEventListener("input", function () {
+    state.longPressTime = normalizeLongPressTime(this.value);
+    syncLongPressTimeUi();
+  });
+  longPressRange.addEventListener("change", function () {
+    state.longPressTime = normalizeLongPressTime(this.value);
+    postLongPressTime(state.longPressTime);
+  });
+  longPressRow.appendChild(longPressRange);
+  longPressRow.appendChild(longPressVal);
+  touchBody.appendChild(longPressRow);
+  els.setLongPressTime = longPressRange;
+  els.setLongPressTimeVal = longPressVal;
+  syncLongPressTimeUi();
+  var touchCard = makeCollapsibleCard("Touch", touchBody, true);
+
   var coverArtCard = null;
   if (!isEpaperPreview()) {
     var coverArtBadge = document.createElement("span");
@@ -1057,6 +1089,7 @@ function buildSettingsPage(parent) {
     backlightCard,
     clockBarCard,
     rotationCard,
+    touchCard,
   ]);
   appendSettingsSection(config, "Sleep & Schedule", [
     idleCard,

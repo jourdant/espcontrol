@@ -133,6 +133,15 @@ var ENTITY_CATALOG = {
         "subpage_chevrons_enabled"
       ]
     },
+    "long_press_time": {
+      "domain": "number",
+      "name": "Long Press Time",
+      "objectIds": [
+        "long_press_time",
+        "screen__long_press_time",
+        "screen_long_press_time"
+      ]
+    },
     "screen_temperature_unit": {
       "domain": "select",
       "name": "Screen: Temperature Unit"
@@ -507,6 +516,7 @@ var ENTITY_CATALOG = {
       "screen_network_status_icon",
       "screen_temperature_degree_symbol",
       "screen_subpage_chevron",
+      "long_press_time",
       "screen_temperature_unit",
       "indoor_temp_entity",
       "outdoor_temp_entity",

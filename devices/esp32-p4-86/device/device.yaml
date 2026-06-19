@@ -288,7 +288,7 @@ lvgl:
   byte_order: little_endian
   touchscreens:
     - touchscreen_id: my_touchscreen
-      long_press_time: 3s
+      long_press_time: 2s
 
 script:
   - id: relay_1_push

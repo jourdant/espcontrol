@@ -118,6 +118,7 @@ export interface PanelSettings {
   language: string;
   clock_format: string;
   screensaver_mode: string;
+  long_press_time?: number;
   screen_rotation: string;
 }
 

@@ -8,6 +8,7 @@ var SSE_ALIAS_GROUPS = {
   networkStatus: ["switch-screen__network_status_icon", "switch-screen_network_status_icon", "switch-network_status_enabled"],
   temperatureDegreeSymbol: ["switch-screen__temperature_degree_symbol", "switch-screen_temperature_degree_symbol", "switch-temperature_degree_symbol_enabled"],
   subpageChevron: ["switch-screen__subpage_chevron", "switch-screen_subpage_chevron", "switch-subpage_chevrons_enabled"],
+  longPressTime: ["number-long_press_time", "number-screen__long_press_time", "number-screen_long_press_time"],
   screensaverTimeout: ["number-screensaver_timeout", "number-screen_saver__timeout", "number-screen_saver_timeout"],
   coverArt: ["switch-screen_saver__cover_art", "switch-screen_saver_cover_art", "switch-screensaver_cover_art"],
   coverArtEntity: ["text-screen_saver__cover_art_entity", "text-screen_saver_cover_art_entity", "text-cover_art_media_player_entity"],
@@ -186,6 +187,10 @@ function connectEvents() {
     "number-home_screen_timeout": function (val) {
       state.homeScreenTimeout = parseFloat(val) || 0;
       syncIdleUi();
+    },
+    "number-long_press_time": function (val) {
+      state.longPressTime = normalizeLongPressTime(val);
+      syncLongPressTimeUi();
     },
     "switch-screen_saver__clock": function (val, d) {
       state.clockScreensaverOn = d.value === true || val === "ON";
@@ -462,6 +467,7 @@ function connectEvents() {
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.temperatureDegreeSymbol, sseHandlers["switch-screen__temperature_degree_symbol"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.subpageChevron, sseHandlers["switch-screen__subpage_chevron"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.screensaverTimeout, sseHandlers["number-screensaver_timeout"]);
+  addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.longPressTime, sseHandlers["number-long_press_time"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.coverArt, sseHandlers["switch-screen_saver__cover_art"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.coverArtEntity, sseHandlers["text-screen_saver__cover_art_entity"]);
   addSseAliases(sseHandlers, SSE_ALIAS_GROUPS.coverArtConditions, sseHandlers["text-screen_saver__cover_art_conditions"]);

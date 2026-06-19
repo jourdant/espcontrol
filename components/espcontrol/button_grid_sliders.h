@@ -1014,6 +1014,7 @@ struct CoverControlCtx {
   std::string entity_id;
   std::string label;
   std::string friendly_name;
+  std::string state;
   int current_position = 0;
   int current_tilt = 0;
   bool current_position_known = false;
@@ -1671,6 +1672,7 @@ inline void subscribe_cover_control_state(CoverControlCtx *ctx) {
     std::function<void(esphome::StringRef)>(
       [ctx](esphome::StringRef state) {
         std::string state_text = string_ref_limited(state, HA_SHORT_STATE_MAX_LEN);
+        ctx->state = state_text;
         ctx->available = !ha_state_unavailable_ref(state);
         cover_control_apply_card_visual(ctx, state_text);
         CoverControlModalUi &ui = cover_control_modal_ui();

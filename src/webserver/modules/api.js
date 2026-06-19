@@ -629,6 +629,14 @@ function postScreensaverTimeout(value) {
   postNumberWithObjectIds(entityName("screensaver_timeout"), entityObjectIds("screensaver_timeout"), value);
 }
 
+function postLongPressTime(value) {
+  postNumberWithObjectIds(
+    entityName("long_press_time"),
+    entityObjectIds("long_press_time"),
+    normalizeLongPressTime(value)
+  );
+}
+
 var SCREENSAVER_ACTION_UNAVAILABLE =
   "Screen dimmed screensaver is not available on this firmware. Update the device firmware, then reload this page.";
 

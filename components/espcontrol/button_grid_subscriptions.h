@@ -247,6 +247,8 @@ inline void subscribe_cover_toggle_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
         std::string state_text = string_ref_limited(state, HA_SHORT_STATE_MAX_LEN);
         bool unavailable = ha_state_unavailable_ref(state);
         apply_control_availability(btn_ptr, btn_ptr, !unavailable);
+        if (cover_state_is_moving(state_text)) lv_obj_add_state(btn_ptr, LV_STATE_USER_1);
+        else lv_obj_clear_state(btn_ptr, LV_STATE_USER_1);
         bool active = cover_toggle_state_is_active(state_text);
         set_card_checked_state(btn_ptr, active);
         lv_label_set_text(icon_lbl, garage_state_uses_open_icon(state_text) ? open_icon : closed_icon);

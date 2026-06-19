@@ -105,6 +105,7 @@ var state = {
   screensaverTimeoutMax: 3600,
   screensaverTimeoutLimitsLoaded: false,
   homeScreenTimeout: 60,
+  longPressTime: 2,
   brightnessDayVal: 100,
   brightnessNightVal: 75,
   automaticBrightnessEnabled: true,
@@ -816,6 +817,20 @@ function syncIdleUi() {
     els.setIdleBadge.className = "sp-card-badge" +
       (state.homeScreenTimeout > 0 ? "" : " sp-hidden");
   }
+}
+
+function normalizeLongPressTime(value) {
+  var n = parseFloat(value);
+  if (!isFinite(n)) n = 2;
+  if (n < 1) n = 1;
+  if (n > 5) n = 5;
+  return Math.round(n * 4) / 4;
+}
+
+function syncLongPressTimeUi() {
+  state.longPressTime = normalizeLongPressTime(state.longPressTime);
+  if (els.setLongPressTime) els.setLongPressTime.value = String(state.longPressTime);
+  if (els.setLongPressTimeVal) els.setLongPressTimeVal.textContent = state.longPressTime + "s";
 }
 
 var els = {};

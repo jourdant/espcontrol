@@ -60,7 +60,7 @@ button:
         id: button_${num}_subpage_label
         text: $icon_chevron_right
         hidden: true
-  # Fire push event, navigate to subpage, or toggle the bound HA entity
+  # Fire push event, navigate to subpage, or perform the configured tap action.
   on_press:
     - if:
         condition:
@@ -108,6 +108,4 @@ button:
               then:
                 - script.execute: screensaver_wake
               else:
-                - lambda: |-
-                    ESP_LOGD("button", "Treating grid card long press as normal tap for slot ${num}");
-                    handle_button_click(id(button_${num}_config).state, ${num}, id(button_${num}));
+                - lambda: 'handle_button_long_press(id(button_${num}_config).state, ${num}, id(button_${num}));'

@@ -921,6 +921,13 @@ var EspControlModel = (() => {
     if (n > 100) return 100;
     return Math.round(n);
   }
+  function normalizeLongPressTime(value) {
+    const n = parseFloat(String(value));
+    if (!Number.isFinite(n)) return 2;
+    if (n < 1) return 1;
+    if (n > 5) return 5;
+    return Math.round(n * 4) / 4;
+  }
   function normalizeNtpServer(value, fallback) {
     const server = String(value == null ? "" : value).trim();
     return server || fallback;
@@ -1036,6 +1043,7 @@ var EspControlModel = (() => {
       screensaverDimmedBrightness: normalizeScreensaverDimmedBrightness(settings.screensaver_dimmed_brightness),
       screensaverTimeout: settings.screensaver_timeout || 300,
       homeScreenTimeout: objectValue(settings, "home_screen_timeout") != null ? settings.home_screen_timeout : 60,
+      longPressTime: normalizeLongPressTime(settings.long_press_time),
       screenRotation: normalizeScreenRotationValue(settings.screen_rotation, current.screenRotationOptions)
     };
   }

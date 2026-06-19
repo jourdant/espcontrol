@@ -1032,10 +1032,17 @@ inline void grid_phase2(
     }
     if (p.type == "cover" && cover_toggle_mode(p.sensor)) {
       if (!p.entity.empty()) {
+        CoverControlCtx *ctx = create_cover_control_context(
+          s, p,
+          has_on ? on_val : DEFAULT_SLIDER_COLOR,
+          has_off ? off_val : DEFAULT_OFF_COLOR,
+          display_icon_font(display),
+          display_main_width_percent(display));
         TransientStatusLabel *status_label = create_transient_status_label(
           s.text_lbl, p.label.empty() ? espcontrol_i18n(std::string("Cover")) : p.label);
         subscribe_cover_toggle_state(s.btn, s.icon_lbl, status_label,
           slider_icon_off(p.type, p.entity, p.icon), slider_icon_on(p.type, p.entity, p.icon, p.icon_on), p.entity);
+        subscribe_cover_control_state(ctx);
         if (p.label.empty())
           subscribe_friendly_name(status_label, p.entity);
       }
@@ -1202,6 +1209,21 @@ inline void grid_phase2(
       continue;
     }
 
+    if (p.type == "light_temperature") {
+      if (!p.entity.empty()) {
+        LightControlCtx *ctx = create_light_control_context(
+          s, p,
+          has_on ? on_val : DEFAULT_SLIDER_COLOR,
+          display_volume_number_font(display),
+          display_volume_label_font(display)
+            ? display_volume_label_font(display)
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          display_icon_font(display),
+          display_volume_width_percent(display));
+        subscribe_light_control_state(ctx);
+      }
+    }
+
     if (p.entity.empty()) continue;
 
     if (p.type == "cover" && cover_modal_mode(p.sensor)) {
@@ -1217,6 +1239,18 @@ inline void grid_phase2(
 
     if (brightness_slider_type(p.type) || p.type == "cover") {
       lv_obj_t *slider = (lv_obj_t *)lv_obj_get_user_data(s.sensor_container);
+      if (brightness_slider_type(p.type) && is_light_entity(p.entity)) {
+        LightControlCtx *ctx = create_light_control_context(
+          s, p,
+          has_on ? on_val : DEFAULT_SLIDER_COLOR,
+          display_volume_number_font(display),
+          display_volume_label_font(display)
+            ? display_volume_label_font(display)
+            : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+          display_icon_font(display),
+          display_volume_width_percent(display));
+        subscribe_light_control_state(ctx);
+      }
       bool sl_has_icon_on = slider_has_alt_icon(p.type, p.icon_on);
       const char *sl_icon_on_cp = sl_has_icon_on ? slider_icon_on(p.type, p.entity, p.icon, p.icon_on) : nullptr;
       const char *sl_icon_off_cp = sl_has_icon_on ? slider_icon_off(p.type, p.entity, p.icon) : nullptr;
@@ -1274,6 +1308,19 @@ inline void grid_phase2(
       &has_sensor[idx - 1], &sensor_text_mode[idx - 1],
       &has_icon_on[idx - 1], &icon_off_cp[idx - 1], &icon_on_cp[idx - 1],
       text_sensor_ctx, p.entity);
+
+    if ((p.type.empty() || p.type == "light_switch") && is_light_entity(p.entity)) {
+      LightControlCtx *ctx = create_light_control_context(
+        s, p,
+        has_on ? on_val : DEFAULT_SLIDER_COLOR,
+        display_volume_number_font(display),
+        display_volume_label_font(display)
+          ? display_volume_label_font(display)
+          : lv_obj_get_style_text_font(s.text_lbl, LV_PART_MAIN),
+        display_icon_font(display),
+        display_volume_width_percent(display));
+      subscribe_light_control_state(ctx);
+    }
 
     if (has_sensor[idx - 1]) {
       if (sensor_text_mode[idx - 1])

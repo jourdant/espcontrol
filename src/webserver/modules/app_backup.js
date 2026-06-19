@@ -71,6 +71,7 @@ function exportConfig() {
       screensaver_dimmed_brightness: normalizeScreensaverDimmedBrightness(state.screensaverDimmedBrightness),
       screensaver_timeout: state.screensaverTimeout,
       home_screen_timeout: state.homeScreenTimeout,
+      long_press_time: normalizeLongPressTime(state.longPressTime),
       screen_rotation: state.screenRotation,
     },
     screen: {
@@ -251,6 +252,7 @@ function importConfig() {
         postScreensaverDimmedBrightness(importedScreensaverDimmedBrightness);
         postScreensaverTimeout(importedSettings.screensaverTimeout);
         postNumber(entityName("home_screen_timeout"), importedSettings.homeScreenTimeout);
+        postLongPressTime(importedSettings.longPressTime);
         var importedScreenRotation = importedSettings.screenRotation;
         if (CFG.features && CFG.features.screenRotation) postSelect(entityName("screen_rotation"), importedScreenRotation);
         state.clockBarTemperatureEntities = importedSettings.clockBarTemperatureEntities;
@@ -292,6 +294,7 @@ function importConfig() {
         state.screensaverDimmedBrightness = importedScreensaverDimmedBrightness;
         state.screensaverTimeout = importedSettings.screensaverTimeout;
         state.homeScreenTimeout = importedSettings.homeScreenTimeout;
+        state.longPressTime = importedSettings.longPressTime;
         state.screenRotation = importedScreenRotation;
 
         syncTemperatureUi();

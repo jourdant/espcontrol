@@ -2518,6 +2518,10 @@ inline bool cover_toggle_state_is_active(const std::string &state) {
   return state == "closed" || state == "closing";
 }
 
+inline bool cover_state_is_moving(const std::string &state) {
+  return state == "opening" || state == "closing";
+}
+
 inline bool garage_state_uses_open_icon(const std::string &state) {
   return state == "open" || state == "opening";
 }

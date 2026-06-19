@@ -132,6 +132,14 @@ export function normalizeScreensaverDimmedBrightness(value: unknown): number {
   return Math.round(n);
 }
 
+export function normalizeLongPressTime(value: unknown): number {
+  const n = parseFloat(String(value));
+  if (!Number.isFinite(n)) return 2;
+  if (n < 1) return 1;
+  if (n > 5) return 5;
+  return Math.round(n * 4) / 4;
+}
+
 export function normalizeNtpServer(value: unknown, fallback: string): string {
   const server = String(value == null ? "" : value).trim();
   return server || fallback;
@@ -260,6 +268,7 @@ export interface BackupPanelSettingsState {
   screensaverDimmedBrightness: number;
   screensaverTimeout: unknown;
   homeScreenTimeout: unknown;
+  longPressTime: number;
   screenRotation: string;
 }
 
@@ -360,6 +369,7 @@ export function normalizeBackupPanelSettings(
     screensaverDimmedBrightness: normalizeScreensaverDimmedBrightness(settings.screensaver_dimmed_brightness),
     screensaverTimeout: settings.screensaver_timeout || 300,
     homeScreenTimeout: objectValue(settings, "home_screen_timeout") != null ? settings.home_screen_timeout : 60,
+    longPressTime: normalizeLongPressTime(settings.long_press_time),
     screenRotation: normalizeScreenRotationValue(settings.screen_rotation, current.screenRotationOptions),
   };
 }
